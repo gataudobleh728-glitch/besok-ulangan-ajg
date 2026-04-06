@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Sejarah — Masa Pendudukan Jepang</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+
+  /* LOGIN */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  .login-card {
+    background: #1a1d27;
+    border: 1px solid #2e3148;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  .login-card h1 { font-size: 1.6rem; color: #a78bfa; margin-bottom: 0.4rem; }
+  .login-card p { color: #888; font-size: 0.9rem; margin-bottom: 1.8rem; }
+  .login-card input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: #0f1117;
+    border: 1px solid #2e3148;
+    border-radius: 10px;
+    color: #e0e0e0;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    outline: none;
+  }
+  .login-card input:focus { border-color: #7c3aed; }
+  .btn-primary {
+    width: 100%;
+    padding: 0.85rem;
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: #6d28d9; }
+
+  /* QUIZ */
+  #quiz-screen { display: none; padding: 1.5rem 1rem 4rem; max-width: 760px; margin: 0 auto; }
+
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1d27;
+    border: 1px solid #2e3148;
+    border-radius: 12px;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 1.5rem;
+    position: sticky;
+    top: 0.5rem;
+    z-index: 10;
+  }
+  .quiz-header .name { font-size: 0.9rem; color: #a78bfa; font-weight: 600; }
+  .quiz-header .progress { font-size: 0.85rem; color: #888; }
+  .timer {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #34d399;
+    background: #0f2320;
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #065f46;
+  }
+  .timer.warning { color: #f97316; background: #2a1500; border-color: #7c2d12; }
+  .timer.danger { color: #f43f5e; background: #2a0010; border-color: #881337; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+  .question-card {
+    background: #1a1d27;
+    border: 1px solid #2e3148;
+    border-radius: 14px;
+    padding: 1.4rem 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .question-num { font-size: 0.78rem; color: #7c3aed; font-weight: 700; letter-spacing: 1px; margin-bottom: 0.6rem; }
+  .question-text { font-size: 1rem; color: #e0e0e0; line-height: 1.6; margin-bottom: 1.2rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid #2e3148;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: #0f1117;
+  }
+  .option-label:hover { border-color: #7c3aed; background: #1a0f2e; }
+  .option-label input[type="radio"] { display: none; }
+  .option-label.selected { border-color: #7c3aed; background: #1e1040; }
+  .option-key {
+    width: 26px; height: 26px; min-width: 26px;
+    border-radius: 50%;
+    border: 1.5px solid #555;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700; color: #aaa;
+    transition: all 0.18s;
+  }
+  .option-label.selected .option-key { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+  .option-text { font-size: 0.95rem; color: #ccc; padding-top: 2px; line-height: 1.5; }
+
+  /* HASIL setelah submit */
+  .option-label.correct { border-color: #10b981; background: #052e1c; }
+  .option-label.correct .option-key { background: #10b981; border-color: #10b981; color: #fff; }
+  .option-label.wrong { border-color: #f43f5e; background: #2a0010; }
+  .option-label.wrong .option-key { background: #f43f5e; border-color: #f43f5e; color: #fff; }
+
+  .submit-area { text-align: center; margin-top: 2rem; }
+  .btn-submit {
+    padding: 0.9rem 3rem;
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-submit:hover { background: #6d28d9; }
+  .btn-submit:disabled { background: #444; cursor: default; }
+
+  /* RESULT */
+  #result-screen { display: none; padding: 2rem 1rem 4rem; max-width: 760px; margin: 0 auto; }
+  .result-card {
+    background: #1a1d27;
+    border: 1px solid #2e3148;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .result-card h2 { font-size: 1.4rem; color: #e0e0e0; margin-bottom: 0.5rem; }
+  .result-score { font-size: 4rem; font-weight: 800; margin: 1rem 0 0.3rem; }
+  .result-score.pass { color: #10b981; }
+  .result-score.fail { color: #f43f5e; }
+  .result-meta { color: #888; font-size: 0.9rem; margin-bottom: 1rem; }
+  .result-stats { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
+  .stat-box { background: #0f1117; border: 1px solid #2e3148; border-radius: 10px; padding: 0.7rem 1.2rem; text-align: center; }
+  .stat-box .val { font-size: 1.6rem; font-weight: 700; }
+  .stat-box .lbl { font-size: 0.78rem; color: #888; margin-top: 2px; }
+  .val.c-green { color: #10b981; }
+  .val.c-red { color: #f43f5e; }
+  .val.c-amber { color: #f59e0b; }
+
+  .review-title { font-size: 1rem; font-weight: 700; color: #a78bfa; margin-bottom: 1rem; }
+
+  /* WARNING MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #1a1d27;
+    border: 1px solid #7c3aed;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+  }
+  .modal-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .modal-box h3 { font-size: 1.2rem; color: #f43f5e; margin-bottom: 0.6rem; }
+  .modal-box p { color: #aaa; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+  .modal-count { font-size: 2rem; font-weight: 800; color: #f43f5e; margin-bottom: 0.3rem; }
+  .btn-close-modal {
+    padding: 0.7rem 2rem;
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .warn-strip {
+    display: none;
+    background: #2a0010;
+    border: 1px solid #881337;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.82rem;
+    color: #fda4af;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  .warn-strip.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>📝 Kuis Sejarah</h1>
+    <p style="color:#a78bfa;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;">Masa Pendudukan Jepang di Indonesia</p>
+    <p>Masukkan namamu untuk memulai • 30 soal • 30 menit</p>
+    <input type="text" id="username-input" placeholder="Nama kamu..." maxlength="40" />
+    <button class="btn-primary" onclick="startQuiz()">Mulai Kuis</button>
+  </div>
+</div>
+
+<!-- ==================== QUIZ ==================== -->
+<div id="quiz-screen">
+  <div id="warn-strip" class="warn-strip">⚠️ Peringatan: Terdeteksi keluar tab/window. Peringatan ke <span id="warn-count">0</span>/3.</div>
+
+  <div class="quiz-header">
+    <div>
+      <div class="name" id="header-name">—</div>
+      <div class="progress" id="header-progress">0 / 30 dijawab</div>
+    </div>
+    <div id="timer" class="timer">30:00</div>
+  </div>
+
+  <div id="questions-container"></div>
+
+  <div class="submit-area">
+    <button class="btn-submit" id="submit-btn" onclick="confirmSubmit()">Kirim Jawaban</button>
+    <p id="submit-hint" style="font-size:0.8rem;color:#888;margin-top:0.6rem;"></p>
+  </div>
+</div>
+
+<!-- ==================== RESULT ==================== -->
+<div id="result-screen">
+  <div class="result-card">
+    <h2>Hasil Kuis — <span id="res-name">—</span></h2>
+    <div id="res-score" class="result-score">0</div>
+    <div class="result-meta" id="res-grade">—</div>
+    <div class="result-stats">
+      <div class="stat-box"><div class="val c-green" id="res-benar">0</div><div class="lbl">Benar</div></div>
+      <div class="stat-box"><div class="val c-red" id="res-salah">0</div><div class="lbl">Salah</div></div>
+      <div class="stat-box"><div class="val c-amber" id="res-kosong">0</div><div class="lbl">Kosong</div></div>
+      <div class="stat-box"><div class="val" id="res-waktu" style="color:#a78bfa">—</div><div class="lbl">Waktu</div></div>
+    </div>
+  </div>
+
+  <div class="review-title">📋 Review Jawaban</div>
+  <div id="review-container"></div>
+</div>
+
+<!-- ==================== MODAL WARNING ==================== -->
+<div class="modal-overlay" id="cheat-modal">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <h3>Terdeteksi Keluar!</h3>
+    <p>Kamu terdeteksi keluar dari halaman kuis. Ini dicatat sebagai pelanggaran.</p>
+    <div class="modal-count" id="modal-warn-num">1</div>
+    <p style="font-size:0.8rem;">dari 3 peringatan (lebih dari 3 → kuis otomatis dikunci)</p>
+    <button class="btn-close-modal" onclick="closeModal()">Lanjutkan Kuis</button>
+  </div>
+</div>
+
+<script>
+// =====================================================
+//  DATA SOAL — GANTI BAGIAN INI DENGAN MATERI ASLI
+// =====================================================
+const questions = [
+  {
+    q: "Tahun berapakah Jepang mulai menduduki Indonesia setelah mengalahkan Belanda?",
+    options: ["1940", "1941", "1942", "1945"],
+    answer: 2
+  },
+  {
+    q: "Ideologi Jepang yang menjadi salah satu latar belakang pendudukannya di Asia, termasuk Indonesia, adalah...",
+    options: ["Hakko Ichiu", "Bushido", "Hokko Ichikyou", "Yamato Damashii"],
+    answer: 2
+  },
+  {
+    q: "Salah satu alasan utama Jepang menduduki Indonesia adalah kebutuhan akan sumber daya alam. Apa yang paling dibutuhkan Jepang untuk kepentingan perangnya?",
+    options: ["Tenaga ahli dan ilmuwan", "Minyak bumi, karet, dan bahan tambang", "Hasil pertanian seperti padi dan jagung", "Produk industri tekstil"],
+    answer: 1
+  },
+  {
+    q: "Kondisi apa yang membuat Jepang lebih mudah merebut Indonesia dari tangan Belanda?",
+    options: ["Belanda sedang berperang dengan Amerika Serikat", "Kekuatan militer Belanda di Indonesia sangat kuat", "Melemahnya kekuasaan Belanda akibat pendudukan Jerman di negeri asalnya", "Rakyat Indonesia membantu Jepang mengusir Belanda secara resmi"],
+    answer: 2
+  },
+  {
+    q: "Jepang membagi wilayah Indonesia menjadi berapa daerah pemerintahan militer?",
+    options: ["2 daerah", "3 daerah", "4 daerah", "5 daerah"],
+    answer: 1
+  },
+  {
+    q: "Tentara ke-16 Jepang (Rikugun) bertanggung jawab atas wilayah...",
+    options: ["Sumatra dengan pusat di Medan", "Jawa dan Madura dengan pusat di Jakarta", "Kalimantan dan Sulawesi dengan pusat di Banjarmasin", "Maluku dan Papua dengan pusat di Ambon"],
+    answer: 1
+  },
+  {
+    q: "Pusat pemerintahan militer Jepang untuk wilayah Sumatra berada di kota...",
+    options: ["Medan", "Palembang", "Padang", "Bukittinggi"],
+    answer: 3
+  },
+  {
+    q: "Wilayah Sulawesi, Kalimantan, dan Maluku berada di bawah kekuasaan...",
+    options: ["Tentara ke-16 Angkatan Darat", "Tentara ke-25 Angkatan Darat", "Armada Selatan ke-2 Angkatan Laut", "Tentara ke-7 Angkatan Udara"],
+    answer: 2
+  },
+  {
+    q: "Pusat komando pemerintahan militer Jepang untuk kawasan Sulawesi, Kalimantan, dan Maluku berada di...",
+    options: ["Manado", "Banjarmasin", "Makassar", "Ambon"],
+    answer: 2
+  },
+  {
+    q: "Dalam susunan pemerintahan militer Jepang, jabatan pucuk pimpinan tertinggi disebut...",
+    options: ["Gunseikan", "Saikoshikikan", "Residen", "Gunseikanbu"],
+    answer: 1
+  },
+  {
+    q: "Gunseikan dalam pemerintahan militer Jepang memiliki tugas sebagai...",
+    options: ["Panglima tertinggi tentara Jepang", "Kepala pemerintahan militer yang diangkat oleh kepala staf tentara", "Pemimpin daerah setingkat provinsi", "Penghubung antara Jepang dan rakyat Indonesia"],
+    answer: 1
+  },
+  {
+    q: "Siapakah Panglima Tentara ke-16 Jepang pertama di Pulau Jawa?",
+    options: ["Mayor Jenderal Seizaburo Okasaki", "Letnan Jenderal Hitoshi Imamura", "Jenderal Hideki Tojo", "Laksamana Yamamoto"],
+    answer: 1
+  },
+  {
+    q: "Dalam skema pemerintahan Jepang di Indonesia, tingkatan di bawah Gunseikan adalah...",
+    options: ["Lurah", "Camat", "Residen", "Ken"],
+    answer: 2
+  },
+  {
+    q: "Sistem pembagian wilayah pemerintahan daerah Jepang di tingkat kabupaten disebut...",
+    options: ["Syu", "Ken", "Gun", "Son"],
+    answer: 1
+  },
+  {
+    q: "Dalam pembagian wilayah pemerintahan daerah Jepang, 'Son' setara dengan tingkatan...",
+    options: ["Provinsi", "Kabupaten", "Kecamatan", "Desa"],
+    answer: 3
+  },
+  {
+    q: "Salah satu ciri pemerintahan militer Jepang di Indonesia adalah bersifat otoriter. Apa bukti nyata dari ciri ini?",
+    options: ["Rakyat diberi kebebasan berpolitik sepenuhnya", "Tidak ada kebebasan politik bagi rakyat dan semua kebijakan untuk kepentingan perang", "Jepang membangun banyak sekolah untuk rakyat Indonesia", "Jepang memberikan otonomi daerah kepada pemimpin lokal"],
+    answer: 1
+  },
+  {
+    q: "Romusha adalah salah satu dampak paling berat dari pendudukan Jepang. Apa yang dimaksud dengan Romusha?",
+    options: ["Sistem pertanian paksa untuk menanam pohon jarak", "Kerja paksa yang membuat rakyat sakit, kelaparan, dan banyak meninggal", "Pungutan pajak hasil bumi yang memberatkan rakyat", "Wajib militer untuk pemuda Indonesia bergabung dengan tentara Jepang"],
+    answer: 1
+  },
+  {
+    q: "Organisasi militer yang dibentuk Jepang dan kelak menjadi cikal bakal Tentara Nasional Indonesia (TNI) adalah...",
+    options: ["Heiho", "Tonarigumi", "PETA (Pembela Tanah Air)", "Kumiyai"],
+    answer: 2
+  },
+  {
+    q: "Berbeda dengan PETA, Heiho adalah...",
+    options: ["Pasukan tempur utama Jepang yang terdiri dari orang Jepang", "Pemuda Indonesia yang dijadikan pembantu tentara Jepang", "Organisasi pengawas masyarakat di tingkat RT", "Kelompok petani yang wajib menyerahkan hasil padi"],
+    answer: 1
+  },
+  {
+    q: "Tonarigumi yang dibentuk Jepang pada masa pendudukan memiliki fungsi utama untuk...",
+    options: ["Melatih rakyat dalam kemiliteran", "Memudahkan pengawasan rakyat dan menjadi cikal bakal RT", "Mengumpulkan hasil bumi untuk kepentingan perang", "Menyebarkan propaganda Gerakan 3A"],
+    answer: 1
+  },
+  {
+    q: "Jepang mewajibkan rakyat Indonesia menyerahkan hasil padi secara paksa. Dampak langsung dari kebijakan ini adalah...",
+    options: ["Peningkatan kesejahteraan petani", "Pertumbuhan ekonomi yang pesat di pedesaan", "Rakyat kekurangan bahan makanan dan banyak terjadi kelaparan", "Harga beras menjadi lebih murah dan terjangkau"],
+    answer: 2
+  },
+  {
+    q: "Salah satu kebijakan Jepang yang secara tidak langsung justru menguntungkan perkembangan bahasa Indonesia adalah...",
+    options: ["Pembentukan kumiyai (koperasi)", "Larangan penggunaan bahasa Belanda", "Wajib menanam pohon jarak", "Dibentuknya sistem pendidikan baru"],
+    answer: 1
+  },
+  {
+    q: "Jepang mewajibkan rakyat menanam pohon jarak. Tujuan sesungguhnya dari kebijakan ini adalah...",
+    options: ["Meningkatkan produksi pangan rakyat Indonesia", "Melestarikan lingkungan hidup di Indonesia", "Memenuhi kebutuhan minyak untuk kepentingan perang Jepang", "Mengembangkan industri farmasi di Indonesia"],
+    answer: 2
+  },
+  {
+    q: "Dampak positif dari sistem pendidikan yang diterapkan Jepang di Indonesia adalah...",
+    options: ["Hanya kalangan bangsawan yang bisa mengakses pendidikan", "Semua rakyat mendapat jenjang pendidikan yang lebih merata", "Kurikulum sepenuhnya mengajarkan kebudayaan Jepang", "Sekolah hanya mengajarkan bahasa Jepang dan militer"],
+    answer: 1
+  },
+  {
+    q: "Apa nama gerakan propaganda yang diluncurkan Jepang untuk menggalang dukungan rakyat Indonesia?",
+    options: ["Gerakan 3A", "Gerakan Asia Timur Raya", "Gerakan Bushido", "Gerakan Hokko Ichikyou"],
+    answer: 0
+  },
+  {
+    q: "Walaupun dirancang untuk kepentingan Jepang, Propaganda Gerakan 3A memiliki dampak yang tidak terduga, yaitu...",
+    options: ["Rakyat Indonesia semakin patuh kepada Jepang", "Menumbuhkan kesadaran nasional di kalangan rakyat Indonesia", "Melemahkan semangat perjuangan rakyat Indonesia", "Membuat rakyat melupakan identitas budayanya"],
+    answer: 1
+  },
+  {
+    q: "Kumiyai yang dibentuk Jepang adalah cikal bakal dari sistem... yang ada di Indonesia hingga kini.",
+    options: ["Perbankan", "Koperasi", "Pasar tradisional", "BUMN"],
+    answer: 1
+  },
+  {
+    q: "Tujuan utama pemerintahan sementara Jepang di Indonesia yang paling tepat adalah...",
+    options: ["Memerdekakan Indonesia dari penjajahan Belanda", "Membangun Indonesia menjadi negara maju di Asia", "Menguasai SDA Indonesia dan mendukung kepentingan perang Jepang", "Menyebarkan kebudayaan dan bahasa Jepang di Asia"],
+    answer: 2
+  },
+  {
+    q: "Pernyataan berikut yang BENAR mengenai pemerintahan militer Jepang di Indonesia adalah...",
+    options: ["Jepang memberi kebebasan berpolitik kepada seluruh rakyat Indonesia", "Kebijakan pemerintahan militer diarahkan untuk kesejahteraan rakyat Indonesia", "Jepang menerapkan pemerintahan yang demokratis dan transparan", "Semua kebijakan diarahkan untuk kepentingan perang Jepang, bukan untuk rakyat"],
+    answer: 3
+  },
+  {
+    q: "Dampak pendudukan Jepang yang paling dirasakan secara langsung oleh rakyat kecil (petani dan buruh) di Indonesia adalah...",
+    options: ["Mendapatkan pendidikan militer melalui PETA dan Heiho", "Penderitaan akibat Romusha, penyerahan padi paksa, dan wajib tanam jarak", "Berkembangnya bahasa Indonesia sebagai bahasa nasional", "Terbentuknya sistem RT melalui Tonarigumi"],
+    answer: 1
+  }
+];
+
+// =====================================================
+//  STATE
+// =====================================================
+let userName = '';
+let userAnswers = new Array(questions.length).fill(null);
+let timerInterval = null;
+let timeLeft = 30 * 60; // 30 menit
+let startTime = null;
+let submitted = false;
+let warnCount = 0;
+const MAX_WARN = 3;
+const KEYS = ['A','B','C','D'];
+
+// =====================================================
+//  LOGIN
+// =====================================================
+function startQuiz() {
+  const val = document.getElementById('username-input').value.trim();
+  if (!val) { alert('Masukkan namamu dulu ya!'); return; }
+  userName = val;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('header-name').textContent = '👤 ' + userName;
+  renderQuestions();
+  startTimer();
+  setupVisibilityDetection();
+  startTime = Date.now();
+}
+
+// =====================================================
+//  RENDER SOAL
+// =====================================================
+function renderQuestions() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'q-card-' + qi;
+    card.innerHTML = `
+      <div class="question-num">SOAL ${qi + 1} dari ${questions.length}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="opts-${qi}">
+        ${q.options.map((opt, oi) => `
+          <label class="option-label" id="lbl-${qi}-${oi}" onclick="selectAnswer(${qi}, ${oi})">
+            <input type="radio" name="q${qi}" value="${oi}" />
+            <span class="option-key">${KEYS[oi]}</span>
+            <span class="option-text">${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectAnswer(qi, oi) {
+  if (submitted) return;
+  userAnswers[qi] = oi;
+  KEYS.forEach((_, i) => {
+    document.getElementById(`lbl-${qi}-${i}`).classList.toggle('selected', i === oi);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  document.getElementById('header-progress').textContent = `${answered} / ${questions.length} dijawab`;
+  const hint = document.getElementById('submit-hint');
+  const remaining = questions.length - answered;
+  if (remaining > 0) {
+    hint.textContent = `⚠️ Masih ada ${remaining} soal belum dijawab.`;
+  } else {
+    hint.textContent = '✅ Semua soal sudah dijawab. Siap kirim!';
+  }
+}
+
+// =====================================================
+//  TIMER
+// =====================================================
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      autoSubmit();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft / 60).toString().padStart(2,'0');
+  const s = (timeLeft % 60).toString().padStart(2,'0');
+  const el = document.getElementById('timer');
+  el.textContent = `⏱ ${m}:${s}`;
+  el.className = 'timer';
+  if (timeLeft <= 300 && timeLeft > 60) el.classList.add('warning');
+  if (timeLeft <= 60) el.classList.add('danger');
+}
+
+function autoSubmit() {
+  if (!submitted) {
+    alert('Waktu habis! Jawaban kamu otomatis dikirim.');
+    submitQuiz();
+  }
+}
+
+// =====================================================
+//  SUBMIT
+// =====================================================
+function confirmSubmit() {
+  const answered = userAnswers.filter(a => a !== null).length;
+  const remaining = questions.length - answered;
+  let msg = 'Kirim jawaban sekarang?';
+  if (remaining > 0) msg = `Masih ada ${remaining} soal kosong. Tetap kirim?`;
+  if (confirm(msg)) submitQuiz();
+}
+
+function submitQuiz() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  showResults(elapsed);
+}
+
+// =====================================================
+//  HASIL & KOREKSI
+// =====================================================
+function showResults(elapsed) {
+  document.getElementById('quiz-screen').style.display = 'none';
+  const resultScreen = document.getElementById('result-screen');
+  resultScreen.style.display = 'block';
+
+  let benar = 0, salah = 0, kosong = 0;
+  questions.forEach((q, qi) => {
+    const ua = userAnswers[qi];
+    if (ua === null) kosong++;
+    else if (ua === q.answer) benar++;
+    else salah++;
+  });
+
+  const score = Math.round((benar / questions.length) * 100);
+  const mm = Math.floor(elapsed / 60).toString().padStart(2,'0');
+  const ss = (elapsed % 60).toString().padStart(2,'0');
+
+  document.getElementById('res-name').textContent = userName;
+  const scoreEl = document.getElementById('res-score');
+  scoreEl.textContent = score;
+  scoreEl.className = 'result-score ' + (score >= 70 ? 'pass' : 'fail');
+
+  let grade = '';
+  if (score >= 90) grade = '🏆 Luar Biasa!';
+  else if (score >= 80) grade = '🌟 Sangat Baik';
+  else if (score >= 70) grade = '✅ Baik — Lulus';
+  else if (score >= 60) grade = '⚠️ Cukup — Perlu Belajar Lagi';
+  else grade = '❌ Kurang — Ulangi Materi';
+  document.getElementById('res-grade').textContent = grade + (warnCount > 0 ? ` | ⚠️ ${warnCount}x peringatan keluar` : '');
+
+  document.getElementById('res-benar').textContent = benar;
+  document.getElementById('res-salah').textContent = salah;
+  document.getElementById('res-kosong').textContent = kosong;
+  document.getElementById('res-waktu').textContent = `${mm}:${ss}`;
+
+  renderReview();
+  window.scrollTo(0,0);
+}
+
+function renderReview() {
+  const container = document.getElementById('review-container');
+  container.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const ua = userAnswers[qi];
+    const card = document.createElement('div');
+    card.className = 'question-card';
+
+    let statusBadge = '';
+    if (ua === null) statusBadge = '<span style="color:#f59e0b;font-weight:700;font-size:0.85rem;">— TIDAK DIJAWAB</span>';
+    else if (ua === q.answer) statusBadge = '<span style="color:#10b981;font-weight:700;font-size:0.85rem;">✓ BENAR</span>';
+    else statusBadge = '<span style="color:#f43f5e;font-weight:700;font-size:0.85rem;">✗ SALAH</span>';
+
+    card.innerHTML = `
+      <div class="question-num" style="display:flex;justify-content:space-between;">
+        <span>SOAL ${qi + 1}</span>${statusBadge}
+      </div>
+      <div class="question-text">${q.q}</div>
+      <div class="options">
+        ${q.options.map((opt, oi) => {
+          let cls = 'option-label';
+          if (oi === q.answer) cls += ' correct';
+          else if (oi === ua && ua !== q.answer) cls += ' wrong';
+          return `
+            <div class="${cls}">
+              <span class="option-key">${KEYS[oi]}</span>
+              <span class="option-text">${opt}${oi === q.answer ? ' ✓' : ''}${oi === ua && ua !== q.answer ? ' (jawabanmu)' : ''}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// =====================================================
+//  DETEKSI KELUAR
+// =====================================================
+function setupVisibilityDetection() {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !submitted) handleCheat();
+  });
+  window.addEventListener('blur', () => {
+    if (!submitted) handleCheat();
+  });
+}
+
+function handleCheat() {
+  if (submitted) return;
+  warnCount++;
+  document.getElementById('modal-warn-num').textContent = warnCount;
+  document.getElementById('cheat-modal').classList.add('show');
+  document.getElementById('warn-count').textContent = warnCount;
+  document.getElementById('warn-strip').classList.add('show');
+  if (warnCount >= MAX_WARN) {
+    document.querySelector('.modal-box p').textContent = '⛔ Kamu telah melanggar 3 kali. Kuis dikunci dan jawaban dikirim otomatis!';
+    document.querySelector('.btn-close-modal').textContent = 'Lihat Hasil';
+    document.querySelector('.btn-close-modal').onclick = () => { closeModal(); submitQuiz(); };
+  }
+}
+
+function closeModal() {
+  document.getElementById('cheat-modal').classList.remove('show');
+  if (warnCount >= MAX_WARN && !submitted) submitQuiz();
+}
+</script>
+</body>
+</html>
