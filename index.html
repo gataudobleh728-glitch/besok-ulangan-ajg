@@ -227,7 +227,7 @@
   <div class="login-card">
     <h1>📝 Kuis Sejarah</h1>
     <p style="color:#a78bfa;font-size:0.85rem;font-weight:600;margin-bottom:0.3rem;">Masa Pendudukan Jepang di Indonesia</p>
-    <p>Masukkan namamu untuk memulai • 30 soal • 30 menit</p>
+    <p>Masukkan namamu untuk memulai • 30 soal • 20 menit • Powered By Dzkyy</p>
     <input type="text" id="username-input" placeholder="Nama kamu..." maxlength="40" />
     <button class="btn-primary" onclick="startQuiz()">Mulai Kuis</button>
   </div>
@@ -242,7 +242,7 @@
       <div class="name" id="header-name">—</div>
       <div class="progress" id="header-progress">0 / 30 dijawab</div>
     </div>
-    <div id="timer" class="timer">30:00</div>
+    <div id="timer" class="timer">20:00</div>
   </div>
 
   <div id="questions-container"></div>
@@ -446,7 +446,7 @@ const questions = [
 let userName = '';
 let userAnswers = new Array(questions.length).fill(null);
 let timerInterval = null;
-let timeLeft = 30 * 60; // 30 menit
+let timeLeft = 20 * 60; // 30 menit
 let startTime = null;
 let submitted = false;
 let warnCount = 0;
@@ -538,7 +538,7 @@ function updateTimerDisplay() {
   const el = document.getElementById('timer');
   el.textContent = `⏱ ${m}:${s}`;
   el.className = 'timer';
-  if (timeLeft <= 300 && timeLeft > 60) el.classList.add('warning');
+  if (timeLeft <= 200 && timeLeft > 60) el.classList.add('warning');
   if (timeLeft <= 60) el.classList.add('danger');
 }
 
